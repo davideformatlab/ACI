@@ -1,396 +1,163 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Analisi Costi Auto: Scrollytelling</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* --- 1. CSS: BRANDING E STRUTTURA --- */
-        
-        :root {
-            --primary-color: #2c3e50;
-            --accent-color: #e74c3c;
-            --bg-color: #f8f9fa;
-            --text-color: #333;
-            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        }
+  <meta charset="UTF-8" />
+  <title>Report Auto Italia - Scrollytelling Final</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        body {
-            margin: 0;
-            font-family: var(--font-main);
-            font-size: 18px;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--bg-color);
-        }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 
-        h1, h2, h3 {
-            font-weight: 700;
-            margin-bottom: 0.5em;
-            color: var(--primary-color);
-            line-height: 1;
-        }
+  <link rel="stylesheet" href="style.css">
 
-        .spacer {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            background-color: #fff;
-            padding: 2rem;
-        }
-
-        .spacer h1 { font-size: 3rem; max-width: 800px; }
-        .spacer p { font-size: 1.5rem; color: #666; }
-
-        /* Il contenitore scrolly */
-        #scrolly {
-            position: relative;
-            display: flex;
-            flex-direction: column-reverse; /* Mobile first: testo sotto, grafico sopra */
-            background-color: #fff;
-            border-top: 1px solid #ddd;
-        }
-
-        /* Desktop layout */
-        @media (min-width: 768px) {
-            #scrolly {
-                flex-direction: row;
-            }
-        }
-
-        /* COLONNA TESTO (Sinistra) */
-        article {
-            position: relative;
-            padding: 0 1rem;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        @media (min-width: 768px) {
-            article { width: 40%; margin: 0; }
-        }
-
-        .step {
-            margin: 0 auto 4rem auto;
-            background-color: rgba(255, 255, 255, 0.95);
-            border-left: 4px solid #ccc;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            color: #333;
-            padding: 2rem;
-            min-height: 60vh; 
-            opacity: 0.3; 
-            transition: opacity 0.5s, border-color 0.5s, transform 0.5s;
-        }
-
-        .step:last-child {
-            margin-bottom: 80vh;
-        }
-
-        .step.is-active {
-            opacity: 1; 
-            border-left-color: var(--primary-color);
-            transform: scale(1.02);
-        }
-
-        .step h3 { margin-top: 0; text-transform: uppercase; font-size: 1rem; letter-spacing: 1px; color: #888; }
-
-        /* COLONNA GRAFICO (Destra - Sticky) */
-        figure {
-            position: -webkit-sticky;
-            position: sticky;
-            top: 0;
-            width: 100%;
-            height: 50vh; 
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #fff;
-            z-index: 10;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        @media (min-width: 768px) {
-            figure {
-                width: 60%;
-                height: 100vh;
-            }
-        }
-
-        /* Container del grafico per gestirne la dimensione */
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            max-height: 600px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        canvas {
-            max-width: 100%;
-            max-height: 100%;
-        }
-
-        /* Highlight numbers in text */
-        .highlight {
-            background-color: rgba(231, 76, 60, 0.2);
-            padding: 0 4px;
-            font-weight: bold;
-            border-radius: 4px;
-        }
-    </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
 
-    <div class="spacer">
-        <h1>Per comprare, assicurare e riparare le auto, gli italiani spendono il 22,4% in meno rispetto al 2000</h1>
-        <p>Tuttavia, salgono vertiginosamente i costi dei pedaggi.</p>
-        <p style="font-size: 1rem; margin-top: 2rem;">↓ Scorri per esplorare i dati ↓</p>
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <div class="bg-container">
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+  </div>
+
+  <section id="page-1">
+    <div class="page-1-inner">
+      <header>
+        <div style="text-align:center; opacity:0.6; margin-bottom:20px; letter-spacing:3px; font-size: 0.8rem; font-weight: 700;">REPORT AUTO 2024</div>
+        <h1 id="title-1">Per comprare, assicurare e riparare le auto,<br>gli italiani spendono meno</h1>
+        <div class="separator-line" id="line-1"></div>
+        <h2 class="subtitle" id="sub-1">Il costo totale scende del 22,4% rispetto al 2000,<br>ma salgono i pedaggi.</h2>
+      </header>
+
+      <div class="grid-layout">
+        <div class="text-block" id="p1-text-1">
+          <p>Quanto costa veramente <strong>un’automobile</strong>? Oltre al prezzo d’acquisto si devono considerare molte altre spese tra le quali: il carburante, la manutenzione, le riparazioni, l’assicurazione, il parcheggio, i pedaggi autostradali e il cambio degli pneumatici.</p>
+        </div>
+        <div class="tip-card" id="p1-card-1">
+          <h3>Spesa d'esercizio complessiva</h3>
+          <span class="big-number">165,7</span>
+          <span class="unit">Miliardi di euro (2024)</span>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="text-block" id="p1-text-2">
+          <p>Secondo i calcoli dell’Aci per <strong>le sole spese di esercizio</strong> nel 2024 gli italiani hanno pagato cifre record. In termini nominali il 3,1% in più rispetto al 2023, il 6,6% in più rispetto al 2019 e ben il 24% in più rispetto al 2000.</p>
+        </div>
+        <div class="tip-card" id="p1-card-2">
+          <h3>Costi di acquisto reali</h3>
+          <span class="big-number">-36,2%</span>
+          <span class="unit">Rispetto al 2000 (interessi inclusi)</span>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="text-block" id="p1-text-3">
+          <p>Il dato cruciale emerge però calcolando i costi <strong>al netto dell’inflazione</strong>. In termini reali la spesa complessiva scende del 22,4% rispetto al 2000 e di circa l’8,6% rispetto al 2019: possedere un’auto oggi pesa meno sul bilancio familiare rispetto a inizio anni Duemila.</p>
+        </div>
+        <div class="tip-card" id="p1-card-3">
+          <h3>Crescita spesa pedaggi</h3>
+          <span class="big-number">+49,3%</span>
+          <span class="unit">L'unica voce in forte crescita reale</span>
+        </div>
+      </div>
     </div>
+  </section>
+
+  <section id="page-2">
+    <header>
+      <h1 id="title-2">Le spese di esercizio dal 2000 al 2024</h1>
+      <div class="separator-line"></div>
+      
+      <div class="instruction-box" id="instructions">
+        
+        <div class="mascot-wrapper">
+          <div class="mascot">
+            <svg viewBox="0 0 100 100" width="100" height="100">
+              <g transform="translate(0, 8)">
+                <line x1="50" y1="20" x2="50" y2="0" stroke="#2c3e50" stroke-width="3" />
+                <circle cx="50" cy="0" r="5" fill="#e74c3c" class="blink-light"/>
+                <rect x="20" y="20" width="60" height="50" rx="10" fill="#2c3e50" />
+                <rect x="15" y="40" width="5" height="10" rx="2" fill="#95a5a6" />
+                <rect x="80" y="40" width="5" height="10" rx="2" fill="#95a5a6" />
+                <rect x="30" y="30" width="40" height="30" rx="5" fill="#ecf0f1" />
+                <circle cx="40" cy="45" r="3" fill="#333" class="eye-anim"/>
+                <circle cx="60" cy="45" r="3" fill="#333" class="eye-anim"/>
+                <path d="M 40 52 Q 50 58 60 52" stroke="#333" stroke-width="2" fill="none" />
+                <path d="M 30 70 L 70 70 L 80 90 L 20 90 Z" fill="#34495e" />
+              </g>
+            </svg>
+          </div>
+
+          <div class="speech-bubble">
+            <p>
+              👋 <strong>Ciao! Come leggere questo grafico?</strong><br>
+              È facilissimo: ti basta <strong>scorrere piano verso il basso</strong>.
+              Mentre leggi i testi a sinistra, vedrai che nel grafico a destra <strong>si illuminerà solo la linea di cui stiamo parlando</strong>, così non ti confondi.
+            </p>
+            <div class="extra-tip">
+              💡 <strong>Un piccolo trucco:</strong> se passi il cursore (o il dito) sopra i puntini delle linee, appariranno i numeri precisi!
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </header>
 
     <section id="scrolly">
-        
-        <article>
-            
-            <div class="step" data-step="1">
-                <h3>Il contesto</h3>
-                <p><strong>Quanto costa veramente un’automobile?</strong> Oltre al prezzo d’acquisto si devono considerare molte altre spese tra le quali: il carburante, la manutenzione, le riparazioni, l’assicurazione, il parcheggio, i pedaggi autostradali e il cambio degli pneumatici.</p>
-                <p>Secondo i calcoli dell’Aci per le sole spese di esercizio nel 2024 gli italiani hanno pagato <span class="highlight">165.7 miliardi di euro</span>.</p>
-            </div>
+      <article>
+        <div class="step is-active" data-series="Totale">
+          <small>Step 1</small>
+          <h2>Totale spese di esercizio</h2>
+          <p>
+            Uno sguardo macro: in termini reali il costo complessivo di possedere e usare un’auto oggi è più
+            basso rispetto al 2000, nonostante l’aumento nominale delle spese.
+          </p>
+        </div>
 
-            <div class="step" data-step="2">
-                <h3>Il calo dei prezzi</h3>
-                <p>In termini nominali la spesa è aumentata del 24% rispetto al 2000. Ma il dato più importante emerge se calcoliamo i costi al netto dell’inflazione.</p>
-                <p>In termini reali, le spese complessive sono calate del <strong>22,4% rispetto al 2000</strong>. A incidere di più è stato il calo dei costi sostenuti per l’<strong>acquisto delle auto</strong> (interessi inclusi), sceso del 36,2%.</p>
-            </div>
+        <div class="step" data-series="Acquisto Auto">
+          <small>Step 2</small>
+          <h2>Acquisto dell’auto</h2>
+          <p>
+            Mettiamo a fuoco la componente di acquisto (interessi inclusi): è la voce che più ha contribuito alla
+            riduzione del costo complessivo nel lungo periodo, pur mostrando una parziale risalita negli ultimi anni.
+          </p>
+        </div>
 
-            <div class="step" data-step="3">
-                <h3>Il carburante</h3>
-                <p>È diminuita anche la spesa per i carburanti, che costituisce circa un quarto di tutti i costi. Nel 2024 è stata dell’<strong>11% più bassa</strong> rispetto al livello del 2000.</p>
-                <p>La benzina è scesa dal 2012, ma c’è stata anche una sostanziale stagnazione dei consumi.</p>
-            </div>
+        <div class="step" data-series="Carburante">
+          <small>Step 3</small>
+          <h2>Carburante</h2>
+          <p>
+            Il carburante resta una voce chiave del budget auto, ma al netto dell’inflazione il suo peso è oggi
+            inferiore rispetto al 2000, grazie a motori più efficienti e consumi medi più contenuti.
+          </p>
+        </div>
 
-            <div class="step" data-step="4">
-                <h3>La visione d'insieme (2000-2024)</h3>
-                <p>Osserviamo l'andamento completo. Mentre acquisto e carburante (linee in basso) scendono o rimangono stabili, notiamo che dal 2020 i costi di acquisto hanno ripreso a salire a causa del rialzo dei tassi e dei prezzi medi dei veicoli (+23,3% tra il 2022 e il 2024).</p>
-            </div>
+        <div class="step" data-series="Pedaggi">
+          <small>Step 4</small>
+          <h2>Pedaggi autostradali</h2>
+          <p>
+            I pedaggi sono l’eccezione: l’indice cresce di quasi il 50% rispetto al 2000, rendendo questa voce
+            particolarmente pesante per chi percorre molti chilometri in autostrada.
+          </p>
+        </div>
+      </article>
 
-            <div class="step" data-step="5">
-                <h3>Chi sale: I Pedaggi</h3>
-                <p>Ciò che è cresciuta davvero molto è la spesa per i <strong>pedaggi autostradali</strong>: <span class="highlight">+49,3%</span> rispetto al 2000.</p>
-                <p>Anche se rispetto al 2019 c'è stato un lieve calo, l'aumento sul lungo periodo è netto, penalizzando chi fa viaggi frequenti a media e lunga distanza.</p>
-            </div>
-
-            <div class="step" data-step="6">
-                <h3>Vincitori e Vinti</h3>
-                <p>Confrontiamo le voci che sono cresciute di più nel 2024 (Indice 100 = Anno 2000).</p>
-                <p>I <strong>Pedaggi</strong> dominano la classifica (149.3), seguiti dalla Tassa Automobilistica (110.9) e dai Parcheggi (108.3). Manutenzione e Assicurazioni sono invece in calo reale.</p>
-            </div>
-
-        </article>
-
-        <figure>
-            <div class="chart-container">
-                <canvas id="myChart"></canvas>
-            </div>
-        </figure>
-
+      <figure>
+        <div class="chart-wrapper">
+          <canvas id="chart"></canvas>
+        </div>
+        <div id="chart-caption"></div>
+      </figure>
     </section>
+  </section>
 
-    <div class="spacer">
-        <h1>Fine della storia.</h1>
-        <p>Fonte Dati: Elaborazione su dati ACI</p>
-    </div>
-
-    <script src="https://unpkg.com/scrollama"></script>
-    
-    <script>
-        // --- 1. PREPARAZIONE DATI (Dai CSV forniti) ---
-        
-        // Dataset "Spese di esercizio dal 2000" (Indici temporali)
-        const years = [2000, 2005, 2010, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024];
-        
-        const dataTimeline = {
-            labels: years,
-            datasets: [
-                { label: 'Acquisto Auto', data: [100, 86.6, 87.1, 82.3, 81.3, 83.4, 85, 84.9, 67.8, 74.9, 73.6, 75.9, 77.6], borderColor: '#2ecc71', tension: 0.3, hidden: false },
-                { label: 'Carburante', data: [100, 113.2, 115.3, 92, 89.1, 91.1, 100.3, 100.2, 74.7, 93, 95.5, 91.3, 89], borderColor: '#f1c40f', tension: 0.3, hidden: false },
-                { label: 'Pedaggi', data: [100, 117, 131.9, 145.7, 153.1, 156.9, 159.9, 161.2, 122.3, 147.6, 148.2, 148.1, 149.3], borderColor: '#e74c3c', borderWidth: 3, tension: 0.3, hidden: false },
-                { label: 'Totale', data: [100, 96.3, 97.2, 82.3, 81.3, 83.4, 85, 84.9, 67.8, 74.9, 73.6, 75.9, 77.6], borderColor: '#34495e', borderDash: [5, 5], tension: 0.3, hidden: false }
-            ]
-        };
-
-        // Dataset "Le spese che sono cresciute di più" (Bar Chart comparativo 2024)
-        // Pedaggi: 149.3, Tassa: 110.9, Parcheggio: 108.3
-        const dataComparison = {
-            labels: ['Pedaggi Autostr.', 'Tassa Auto', 'Parcheggio', 'Carburante', 'Acquisto'],
-            datasets: [{
-                label: 'Indice Costo 2024 (Base 2000=100)',
-                data: [149.3, 110.9, 108.3, 89, 77.6],
-                backgroundColor: [
-                    '#e74c3c', // Pedaggi (Alto)
-                    '#e67e22', 
-                    '#f1c40f',
-                    '#3498db',
-                    '#2ecc71'  // Acquisto (Basso)
-                ]
-            }]
-        };
-
-        // --- 2. SETUP CHART.JS ---
-        
-        const ctx = document.getElementById('myChart').getContext('2d');
-        let myChart;
-
-        // Configurazione base comune
-        const commonOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: true, text: 'Indice Spese Auto (2000=100)', font: { size: 18 } }
-            },
-            scales: {
-                y: { beginAtZero: false }
-            }
-        };
-
-        function initChart() {
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: dataTimeline,
-                options: commonOptions
-            });
-        }
-
-        // --- 3. LOGICA SCROLLAMA ---
-
-        const scrolly = document.querySelector("#scrolly");
-        const step = scrolly.querySelectorAll(".step");
-        const scroller = scrollama();
-
-        function handleStepEnter(response) {
-            const index = response.index; // 0-based index (0 = step 1)
-            
-            // Evidenzia lo step attivo
-            step.forEach(node => node.classList.remove('is-active'));
-            response.element.classList.add('is-active');
-
-            // LOGICA DI CAMBIO GRAFICO
-            // Aggiorniamo il grafico in base allo step corrente
-            updateChartForStep(index + 1);
-        }
-
-        function updateChartForStep(stepNumber) {
-            if (!myChart) return;
-
-            // Resetta configurazioni speciali se necessario
-            myChart.options.plugins.title.text = "Indice Spese Auto (2000=100)";
-            
-            if (stepNumber === 1) {
-                // STEP 1: Totale
-                // Mostriamo solo il Totale per dare contesto
-                if(myChart.config.type !== 'line') {
-                    myChart.destroy();
-                    myChart = new Chart(ctx, { type: 'line', data: dataTimeline, options: commonOptions });
-                }
-                myChart.data.datasets.forEach(d => d.hidden = true);
-                myChart.data.datasets[3].hidden = false; // Totale visibile
-                myChart.update();
-            }
-            
-            else if (stepNumber === 2) {
-                // STEP 2: Acquisto scende
-                if(myChart.config.type !== 'line') {
-                    myChart.destroy();
-                    myChart = new Chart(ctx, { type: 'line', data: dataTimeline, options: commonOptions });
-                }
-                myChart.data.datasets.forEach(d => d.hidden = true);
-                myChart.data.datasets[0].hidden = false; // Acquisto
-                myChart.data.datasets[3].hidden = false; // Totale
-                myChart.update();
-            }
-
-            else if (stepNumber === 3) {
-                // STEP 3: Carburante
-                if(myChart.config.type !== 'line') {
-                    myChart.destroy();
-                    myChart = new Chart(ctx, { type: 'line', data: dataTimeline, options: commonOptions });
-                }
-                myChart.data.datasets.forEach(d => d.hidden = true);
-                myChart.data.datasets[1].hidden = false; // Carburante
-                myChart.update();
-            }
-
-            else if (stepNumber === 4) {
-                // STEP 4: Tutto Insieme (Line Chart completo)
-                if(myChart.config.type !== 'line') {
-                    myChart.destroy();
-                    myChart = new Chart(ctx, { type: 'line', data: dataTimeline, options: commonOptions });
-                }
-                myChart.data.datasets.forEach(d => d.hidden = false); // Tutto visibile
-                myChart.update();
-            }
-
-            else if (stepNumber === 5) {
-                // STEP 5: Focus Pedaggi (Line Chart highlight)
-                if(myChart.config.type !== 'line') {
-                    myChart.destroy();
-                    myChart = new Chart(ctx, { type: 'line', data: dataTimeline, options: commonOptions });
-                }
-                myChart.data.datasets.forEach(d => d.hidden = true);
-                myChart.data.datasets[2].hidden = false; // Pedaggi
-                myChart.update();
-            }
-
-            else if (stepNumber === 6) {
-                // STEP 6: Bar Chart (Confronto)
-                // Distruggiamo il grafico a linee e creiamo quello a barre
-                myChart.destroy();
-                myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: dataComparison,
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            title: { display: true, text: 'Voci di spesa nel 2024 (vs 2000)', font: { size: 18 } }
-                        },
-                        scales: {
-                            y: { 
-                                beginAtZero: true,
-                                grid: { color: '#f0f0f0' }
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        function init() {
-            initChart(); // Crea il primo grafico
-
-            scroller
-                .setup({
-                    step: "#scrolly article .step",
-                    offset: 0.6, // Triggera quando lo step è al 60% dall'alto
-                    debug: false 
-                })
-                .onStepEnter(handleStepEnter);
-        }
-
-        // Avvia tutto
-        init();
-    </script>
+  <script src="script.js"></script>
 </body>
 </html>
