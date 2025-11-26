@@ -2,29 +2,185 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Report Auto Italia - Scrollytelling Final</title>
+  <title>Report Auto Italia - Finale</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css">
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* --- CSS GLOBALE --- */
+    :root {
+      --primary-color: #007BFF;
+      --accent-color: #00d2ff;
+      --bg-dark: #0b0b0b;
+      --text-main: #ffffff;
+      --text-muted: #cfcfcf;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --light-text: #333;
+      --light-primary: #2c3e50;
+      --danger-color: #e74c3c;
+      --success-color: #2ecc71;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* --- UI ELEMENTS --- */
+    .progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 5px; background: rgba(255, 255, 255, 0.05); z-index: 9999; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); box-shadow: 0 0 10px var(--primary-color); }
+
+    .bg-container { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: -1; overflow: hidden; }
+    .bg-image { width: 100%; height: 120%; background-image: url('https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center; filter: brightness(0.6) contrast(1.1); }
+    .bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%); }
+
+    /* --- TYPOGRAPHY --- */
+    h1 { font-weight: 900; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.1; text-transform: uppercase; text-align: center; margin-bottom: 25px; background: linear-gradient(45deg, #fff, #aabbd3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0; transform: translateY(30px); }
+    .separator-line { height: 4px; background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); width: 0%; margin: 0 auto 40px auto; border-radius: 2px; box-shadow: 0 0 15px var(--primary-color); }
+    h2.subtitle { font-weight: 300; font-size: clamp(1.2rem, 2.5vw, 1.8rem); color: var(--text-muted); text-align: center; margin-bottom: 80px; opacity: 0; letter-spacing: 1px; }
+    p { font-size: 1.1rem; line-height: 1.8; color: var(--text-muted); margin-bottom: 0; }
+    strong { color: white; font-weight: 600; text-decoration: underline cubic-bezier(0.19, 1, 0.22, 1); text-decoration-color: var(--primary-color); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+    /* --- PAGE 1 --- */
+    #page-1 { min-height: 100vh; padding: 100px 20px; }
+    .page-1-inner { max-width: 1200px; margin: 0 auto; }
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .text-block { padding: 30px; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 12px; opacity: 0; transform: translateX(-50px); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
+    .tip-card { background: rgba(0, 0, 0, 0.6); border: 1px solid var(--glass-border); border-left: 4px solid var(--primary-color); padding: 30px; border-radius: 0 12px 12px 0; opacity: 0; transform: translateX(50px); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .tip-card:hover { transform: translateX(50px) translateY(-5px) !important; box-shadow: 0 10px 20px rgba(0, 123, 255, 0.2); border-color: var(--primary-color); }
+    .tip-card h3 { font-size: 1rem; color: #fff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; opacity: 0.8; }
+    .tip-card .big-number { font-size: clamp(2.5rem, 4vw, 3.8rem); font-weight: 900; display: block; margin: 5px 0; background: linear-gradient(180deg, var(--accent-color), var(--primary-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .tip-card .unit { font-size: 0.9rem; color: #888; font-weight: 400; display: block; }
+    .spacer { height: 100px; grid-column: 1 / -1; }
+
+    /* --- SEZIONI BLU --- */
+    .blue-section { position: relative; z-index: 10; background-color: #002347; color: #ffffff; padding: 100px 20px; margin: 120px 0; border-radius: 4px; opacity: 0; transform: translateY(50px); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+    .blue-inner { max-width: 900px; margin: 0 auto; text-align: center; }
+    .blue-title { font-weight: 900; text-transform: uppercase; font-size: clamp(2rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 60px; color: #ffffff; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    .blue-content { text-align: left; font-size: 1.15rem; line-height: 1.8; color: #e0e0e0; display: flex; flex-direction: column; gap: 40px; }
+    .blue-text-block strong { color: #ffffff; font-weight: 700; background: rgba(255,255,255,0.1); padding: 0 4px; border-radius: 4px; }
+    .blue-separator { height: 1px; width: 100px; background: rgba(255,255,255,0.3); margin: 0 auto; }
+
+    /* --- PAGE 2 (SCROLLY) --- */
+    #page-2 { background: linear-gradient(to bottom, #eef2f3 0%, #ffffff 15%); color: var(--light-text); padding: 80px 0 100px; position: relative; z-index: 2; }
+    #page-2 header { max-width: 1200px; margin: 0 auto 40px; padding: 0 20px; text-align: center; }
+    /* Modifica: Colori scuri forzati per sfondi chiari */
+    #page-2 h1, #page-3 h1 { background: none; -webkit-text-fill-color: initial; color: var(--light-primary); opacity: 1; transform: translateY(0); margin-bottom: 16px; }
+    #page-2 .separator-line, #page-3 .separator-line { box-shadow: none; background: linear-gradient(90deg, var(--light-primary), var(--accent-color)); width: 150px; }
+    #page-2 p, #page-3 p { color: #4b5563; }
+    #page-2 strong, #page-3 strong { color: #111827; text-decoration-color: var(--light-primary); }
+
+    /* Mascotte */
+    .instruction-box { max-width: 750px; margin: 40px auto 0; background: transparent; padding: 0; opacity: 0; transform: translateY(30px); }
+    .mascot-wrapper { display: flex; align-items: flex-start; gap: 20px; }
+    .mascot { flex-shrink: 0; width: 100px; animation: float 3s ease-in-out infinite; }
+    .speech-bubble { position: relative; background: #f0f7ff; border: 2px solid #2c3e50; border-radius: 20px; padding: 25px; color: #2c3e50; font-size: 1.05rem; line-height: 1.5; text-align: left; box-shadow: 5px 5px 0px rgba(44, 62, 80, 0.2); }
+    .speech-bubble::before { content: ''; position: absolute; top: 30px; left: -12px; width: 0; height: 0; border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-right: 12px solid #2c3e50; }
+    .speech-bubble::after { content: ''; position: absolute; top: 33px; left: -8px; width: 0; height: 0; border-top: 9px solid transparent; border-bottom: 9px solid transparent; border-right: 9px solid #f0f7ff; }
+    .extra-tip { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #cbd5e0; font-size: 0.95rem; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+    .eye-anim { transform-origin: center; animation: blink 4s infinite; }
+
+    /* Scrolly Layout */
+    #scrolly { max-width: 1200px; margin: 0 auto; padding: 40px 20px 0; display: flex; flex-direction: row; }
+    #scrolly article { width: 40%; margin: 0; padding: 2rem 2rem 4rem 0; }
+    #scrolly figure { width: 60%; height: 70vh; position: sticky; top: 80px; margin: 0; padding: 2rem 0 2rem 2rem; display: flex; flex-direction: column; justify-content: center; background: transparent; }
+    .step { margin: 0 auto 70vh auto; padding: 1.5rem 1.5rem 1.5rem 1.25rem; border-left: 4px solid #ddd; background: #ffffff; opacity: 0.8; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transform: scale(0.98); transition: opacity 0.35s ease, border-color 0.35s ease, transform 0.35s ease, box-shadow 0.35s ease; min-height: 200px; border-radius: 12px; }
+    .step:last-child { margin-bottom: 10vh; }
+    .step.is-active { opacity: 1; transform: scale(1); box-shadow: 0 15px 30px rgba(0,0,0,0.1); z-index: 2; }
+    .step small { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; color: #888; }
+    .step h2 { margin-top: 0.4rem; margin-bottom: 0.4rem; color: var(--light-primary); font-size: 1.1rem; }
+    .step p { margin-top: 0.75rem; line-height: 1.6; color: #555; }
+    .chart-wrapper { flex: 1; position: relative; min-height: 320px; }
+    #chart-caption { margin-top: 0.75rem; padding: 0.9rem 1.1rem; border-radius: 16px; background: rgba(255,255,255,0.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(0,0,0,0.04); font-size: 0.95rem; line-height: 1.6; transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
+    #chart-caption h3 { margin-bottom: 0.25rem; font-size: 1rem; color: var(--light-primary); }
+    #chart-caption p { margin: 0.25rem 0 0; color: #374151; }
+    .caption-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+
+    /* --- PAGE 3 (INTERACTIVE) --- */
+    #page-3 { background-color: #ffffff; padding: 100px 20px; position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; }
+    .interactive-wrapper { max-width: 1000px; margin: 40px auto; width: 100%; }
+    
+    /* Labels/Buttons Container */
+    .chart-controls {
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px;
+    }
+    .chart-btn {
+      background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 20px; padding: 8px 16px;
+      cursor: pointer; font-family: 'Roboto', sans-serif; font-size: 0.9rem; color: #374151;
+      transition: all 0.3s ease;
+    }
+    .chart-btn:hover { background: #e5e7eb; }
+    .chart-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); }
+    
+    .final-chart-container {
+      height: 500px; width: 100%; background: #f9fafb; border-radius: 16px; border: 1px solid #eee; padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    /* --- FOOTER --- */
+    footer {
+      background-color: #0b0b0b; color: #888; padding: 60px 20px; text-align: center; position: relative; z-index: 10;
+    }
+    .footer-content { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 30px; }
+    .logo-placeholder {
+      width: 150px; height: 50px; background: rgba(255,255,255,0.1); border: 2px dashed rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center; color: #666; font-size: 0.8rem; border-radius: 8px;
+    }
+    .footer-info p { font-size: 0.9rem; color: #666; margin: 5px 0; }
+    .back-to-top {
+      margin-top: 20px; padding: 12px 24px; background: var(--primary-color); color: white; border: none; border-radius: 30px;
+      cursor: pointer; font-weight: bold; transition: transform 0.2s;
+    }
+    .back-to-top:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,123,255,0.4); }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .grid-layout { grid-template-columns: 1fr; gap: 30px; }
+      .text-block, .tip-card { transform: translateY(30px); border-radius: 12px; }
+      .tip-card { border-left: 1px solid var(--glass-border); border-top: 4px solid var(--primary-color); margin-top: -10px; }
+      #page-1 { padding: 60px 16px; }
+      #page-2 { padding: 60px 0 80px; }
+      .blue-section { margin: 60px 0; padding: 60px 20px; }
+      .mascot-wrapper { flex-direction: column; align-items: center; }
+      .mascot { margin-bottom: 10px; width: 80px; }
+      .speech-bubble::before { top: -12px; left: 50%; transform: translateX(-50%) rotate(90deg); }
+      .speech-bubble::after { top: -8px; left: 50%; transform: translateX(-50%) rotate(90deg); }
+      .speech-bubble { text-align: center; font-size: 0.95rem; }
+      #scrolly { flex-direction: column-reverse; padding: 0; }
+      #scrolly figure { position: -webkit-sticky; position: sticky; top: 40px; width: 100%; height: 40vh; padding: 10px 16px; background: rgba(255, 255, 255, 0.98); border-bottom: 1px solid #eee; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+      #scrolly article { width: 100%; padding: 0 16px; margin-top: 1rem; position: relative; z-index: 10; }
+      .step { margin: 0 auto 60vh auto; min-height: auto; opacity: 0.6; }
+      .step.is-active { opacity: 1; }
+      #chart-caption { padding: 0.5rem 0.8rem; font-size: 0.85rem; }
+      .chart-btn { font-size: 0.8rem; padding: 6px 12px; }
+      .final-chart-container { height: 400px; padding: 10px; }
+    }
+    @media (min-width: 768px) {
+      .blue-content { flex-direction: row; align-items: flex-start; gap: 60px; }
+      .blue-separator { width: 1px; height: 150px; margin: 0; }
+    }
+  </style>
 </head>
 <body>
 
-  <div class="progress-container">
-    <div class="progress-bar" id="progressBar"></div>
-  </div>
-
-  <div class="bg-container">
-    <div class="bg-image"></div>
-    <div class="bg-overlay"></div>
-  </div>
+  <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="bg-container"><div class="bg-image"></div><div class="bg-overlay"></div></div>
 
   <section id="page-1">
     <div class="page-1-inner">
@@ -34,38 +190,26 @@
         <div class="separator-line" id="line-1"></div>
         <h2 class="subtitle" id="sub-1">Il costo totale scende del 22,4% rispetto al 2000,<br>ma salgono i pedaggi.</h2>
       </header>
-
       <div class="grid-layout">
-        <div class="text-block" id="p1-text-1">
-          <p>Quanto costa veramente <strong>un’automobile</strong>? Oltre al prezzo d’acquisto si devono considerare molte altre spese tra le quali: il carburante, la manutenzione, le riparazioni, l’assicurazione, il parcheggio, i pedaggi autostradali e il cambio degli pneumatici.</p>
-        </div>
-        <div class="tip-card" id="p1-card-1">
-          <h3>Spesa d'esercizio complessiva</h3>
-          <span class="big-number">165,7</span>
-          <span class="unit">Miliardi di euro (2024)</span>
-        </div>
-
+        <div class="text-block" id="p1-text-1"><p>Quanto costa veramente <strong>un’automobile</strong>? Oltre al prezzo d’acquisto si devono considerare molte altre spese tra le quali: il carburante, la manutenzione, le riparazioni, l’assicurazione, il parcheggio, i pedaggi autostradali e il cambio degli pneumatici.</p></div>
+        <div class="tip-card" id="p1-card-1"><h3>Spesa d'esercizio complessiva</h3><span class="big-number">165,7</span><span class="unit">Miliardi di euro (2024)</span></div>
         <div class="spacer"></div>
-
-        <div class="text-block" id="p1-text-2">
-          <p>Secondo i calcoli dell’Aci per <strong>le sole spese di esercizio</strong> nel 2024 gli italiani hanno pagato cifre record. In termini nominali il 3,1% in più rispetto al 2023, il 6,6% in più rispetto al 2019 e ben il 24% in più rispetto al 2000.</p>
-        </div>
-        <div class="tip-card" id="p1-card-2">
-          <h3>Costi di acquisto reali</h3>
-          <span class="big-number">-36,2%</span>
-          <span class="unit">Rispetto al 2000 (interessi inclusi)</span>
-        </div>
-
+        <div class="text-block" id="p1-text-2"><p>Secondo i calcoli dell’Aci per <strong>le sole spese di esercizio</strong> nel 2024 gli italiani hanno pagato cifre record. In termini nominali il 3,1% in più rispetto al 2023, il 6,6% in più rispetto al 2019 e ben il 24% in più rispetto al 2000.</p></div>
+        <div class="tip-card" id="p1-card-2"><h3>Costi di acquisto reali</h3><span class="big-number">-36,2%</span><span class="unit">Rispetto al 2000 (interessi inclusi)</span></div>
         <div class="spacer"></div>
+        <div class="text-block" id="p1-text-3"><p>Il dato cruciale emerge però calcolando i costi <strong>al netto dell’inflazione</strong>. In termini reali la spesa complessiva scende del 22,4% rispetto al 2000 e di circa l’8,6% rispetto al 2019.</p></div>
+        <div class="tip-card" id="p1-card-3"><h3>Crescita spesa pedaggi</h3><span class="big-number">+49,3%</span><span class="unit">L'unica voce in forte crescita reale</span></div>
+      </div>
+    </div>
+  </section>
 
-        <div class="text-block" id="p1-text-3">
-          <p>Il dato cruciale emerge però calcolando i costi <strong>al netto dell’inflazione</strong>. In termini reali la spesa complessiva scende del 22,4% rispetto al 2000 e di circa l’8,6% rispetto al 2019: possedere un’auto oggi pesa meno sul bilancio familiare rispetto a inizio anni Duemila.</p>
-        </div>
-        <div class="tip-card" id="p1-card-3">
-          <h3>Crescita spesa pedaggi</h3>
-          <span class="big-number">+49,3%</span>
-          <span class="unit">L'unica voce in forte crescita reale</span>
-        </div>
+  <section id="blue-break" class="blue-section">
+    <div class="blue-inner">
+      <h2 class="blue-title">Scende la spesa<br>di acquisto<br>delle autovetture</h2>
+      <div class="blue-content">
+        <div class="blue-text-block"><p>Come mai? È diminuita la spesa per i carburanti, che solitamente costituisce circa un quarto di tutti i costi collegati alle autovetture: in termini reali nel 2024 è stata <strong>dell’11% più bassa rispetto al livello del 2000</strong> e <strong>dell’11,2% più bassa rispetto al 2019</strong>. La benzina, per esempio, dal 2012 a oggi è scesa ma oltre a questo c’è stata anche una sostanziale stagnazione, o un aumento molto limitato, dei consumi.</p></div>
+        <div class="blue-separator"></div>
+        <div class="blue-text-block"><p>A incidere di più, però, è stato il calo, sempre a livello aggregato, dei costi sostenuti per <strong>l’acquisto delle auto</strong>, inclusi il pagamento delle rate e degli interessi. È una voce che nel 2024 rappresentava quasi un terzo delle spese di esercizio complessive delle auto e che ha visto <strong>una riduzione di ben il 36,2% rispetto al 2000</strong> e <strong>dell’8% rispetto al 2019</strong>. Si tratta di un dato causato innanzitutto dalla riduzione degli acquisti (-18,7% in 5 anni) che ha compensato l’incremento dei prezzi delle auto.</p></div>
       </div>
     </div>
   </section>
@@ -74,9 +218,7 @@
     <header>
       <h1 id="title-2">Le spese di esercizio dal 2000 al 2024</h1>
       <div class="separator-line"></div>
-      
       <div class="instruction-box" id="instructions">
-        
         <div class="mascot-wrapper">
           <div class="mascot">
             <svg viewBox="0 0 100 100" width="100" height="100">
@@ -94,70 +236,212 @@
               </g>
             </svg>
           </div>
-
           <div class="speech-bubble">
-            <p>
-              👋 <strong>Ciao! Come leggere questo grafico?</strong><br>
-              È facilissimo: ti basta <strong>scorrere piano verso il basso</strong>.
-              Mentre leggi i testi a sinistra, vedrai che nel grafico a destra <strong>si illuminerà solo la linea di cui stiamo parlando</strong>, così non ti confondi.
-            </p>
-            <div class="extra-tip">
-              💡 <strong>Un piccolo trucco:</strong> se passi il cursore (o il dito) sopra i puntini delle linee, appariranno i numeri precisi!
-            </div>
+            <p>👋 <strong>Ciao! Come leggere questo grafico?</strong><br>È facilissimo: ti basta <strong>scorrere piano verso il basso</strong>. Mentre leggi i testi a sinistra, vedrai che nel grafico a destra <strong>si illuminerà solo la linea di cui stiamo parlando</strong>, così non ti confondi.</p>
+            <div class="extra-tip">💡 <strong>Un piccolo trucco:</strong> se passi il cursore (o il dito) sopra i puntini delle linee, appariranno i numeri precisi!</div>
           </div>
         </div>
-
       </div>
     </header>
 
     <section id="scrolly">
       <article>
-        <div class="step is-active" data-series="Totale">
-          <small>Step 1</small>
-          <h2>Totale spese di esercizio</h2>
-          <p>
-            Uno sguardo macro: in termini reali il costo complessivo di possedere e usare un’auto oggi è più
-            basso rispetto al 2000, nonostante l’aumento nominale delle spese.
-          </p>
-        </div>
-
-        <div class="step" data-series="Acquisto Auto">
-          <small>Step 2</small>
-          <h2>Acquisto dell’auto</h2>
-          <p>
-            Mettiamo a fuoco la componente di acquisto (interessi inclusi): è la voce che più ha contribuito alla
-            riduzione del costo complessivo nel lungo periodo, pur mostrando una parziale risalita negli ultimi anni.
-          </p>
-        </div>
-
-        <div class="step" data-series="Carburante">
-          <small>Step 3</small>
-          <h2>Carburante</h2>
-          <p>
-            Il carburante resta una voce chiave del budget auto, ma al netto dell’inflazione il suo peso è oggi
-            inferiore rispetto al 2000, grazie a motori più efficienti e consumi medi più contenuti.
-          </p>
-        </div>
-
-        <div class="step" data-series="Pedaggi">
-          <small>Step 4</small>
-          <h2>Pedaggi autostradali</h2>
-          <p>
-            I pedaggi sono l’eccezione: l’indice cresce di quasi il 50% rispetto al 2000, rendendo questa voce
-            particolarmente pesante per chi percorre molti chilometri in autostrada.
-          </p>
-        </div>
+        <div class="step is-active" data-series="Totale"><small>Step 1</small><h2>Totale spese di esercizio</h2><p>Uno sguardo macro: in termini reali il costo complessivo di possedere e usare un’auto oggi è più basso rispetto al 2000, nonostante l’aumento nominale delle spese.</p></div>
+        <div class="step" data-series="Acquisto Auto"><small>Step 2</small><h2>Acquisto dell’auto</h2><p>Mettiamo a fuoco la componente di acquisto (interessi inclusi): è la voce che più ha contribuito alla riduzione del costo complessivo nel lungo periodo, pur mostrando una parziale risalita negli ultimi anni.</p></div>
+        <div class="step" data-series="Carburante"><small>Step 3</small><h2>Carburante</h2><p>Il carburante resta una voce chiave del budget auto, ma al netto dell’inflazione il suo peso è oggi inferiore rispetto al 2000, grazie a motori più efficienti e consumi medi più contenuti.</p></div>
+        <div class="step" data-series="Pedaggi"><small>Step 4</small><h2>Pedaggi autostradali</h2><p>I pedaggi sono l’eccezione: l’indice cresce di quasi il 50% rispetto al 2000, rendendo questa voce particolarmente pesante per chi percorre molti chilometri in autostrada.</p></div>
       </article>
-
       <figure>
-        <div class="chart-wrapper">
-          <canvas id="chart"></canvas>
-        </div>
+        <div class="chart-wrapper"><canvas id="chart"></canvas></div>
         <div id="chart-caption"></div>
       </figure>
     </section>
   </section>
 
-  <script src="script.js"></script>
+  <section id="blue-break-2" class="blue-section">
+    <div class="blue-inner">
+      <h2 class="blue-title">PEDAGGI<br><span style="color:#e74c3c;">+50%</span></h2>
+      <div class="blue-content" style="justify-content: center;">
+        <div class="blue-text-block" style="max-width: 800px;">
+          <p>Ciò che è cresciuta davvero molto è la spesa per i pedaggi autostradali: <strong>+49,3% rispetto al 2000</strong>. Anche se rispetto al 2019 c'è stato un lieve calo, l'aumento sul lungo periodo è netto, penalizzando chi fa viaggi frequenti a media e lunga distanza.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="page-3">
+    <header>
+      <h1 id="title-3">Quali voci sono cresciute di più?</h1>
+      <div class="separator-line" id="line-3"></div>
+      <p style="text-align:center; max-width:700px; margin:0 auto;">
+        Clicca sulle etichette qui sotto per vedere come è cambiato il costo di ogni singola voce dal 2000 al 2024.
+      </p>
+    </header>
+    
+    <div class="interactive-wrapper">
+      <div class="chart-controls" id="chartControls"></div>
+      
+      <div class="final-chart-container">
+        <canvas id="interactiveChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-content">
+      <div class="logo-placeholder">[ SPAZIO LOGO ]</div>
+      <div class="footer-info">
+        <p>Report Auto 2024 - Analisi Spese di Esercizio</p>
+        <p><strong>Fonte Dati:</strong> Elaborazione su dati ACI 2024</p>
+      </div>
+      <button class="back-to-top" onclick="gsap.to(window, {duration: 1, scrollTo: 0, ease: 'power2.out'})">
+        ↑ Torna all'inizio
+      </button>
+    </div>
+  </footer>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+    // 1. UI BASE
+    gsap.to("#progressBar", { width: "100%", ease: "none", scrollTrigger: { trigger: "body", start: "top top", end: "bottom bottom", scrub: 0 } });
+    gsap.to(".bg-image", { yPercent: 20, ease: "none", scrollTrigger: { trigger: "body", start: "top top", end: "bottom bottom", scrub: true } });
+
+    // 2. PAGE 1 ANIMAZIONI
+    const tl = gsap.timeline();
+    tl.to("#title-1", { duration: 1.2, opacity: 1, y: 0, ease: "power4.out" })
+      .to("#line-1", { duration: 1, width: "150px", ease: "expo.out" }, "-=0.8")
+      .to("#sub-1", { duration: 1, opacity: 1 }, "-=0.6");
+
+    function animScroll(id, originX) {
+      let xVal = window.innerWidth < 768 ? 0 : originX;
+      let yVal = window.innerWidth < 768 ? 30 : 0;
+      gsap.fromTo(id, { opacity: 0, x: xVal, y: yVal }, { scrollTrigger: { trigger: id, start: "top 85%", toggleActions: "play none none reverse" }, duration: 0.8, opacity: 1, x: 0, y: 0, ease: "power2.out" });
+    }
+    animScroll("#p1-text-1", -50); animScroll("#p1-card-1", 50); animScroll("#p1-text-2", -50); animScroll("#p1-card-2", 50); animScroll("#p1-text-3", -50); animScroll("#p1-card-3", 50);
+
+    // 3. SEZIONI BLU
+    const blueSections = document.querySelectorAll(".blue-section");
+    blueSections.forEach(section => {
+      gsap.to(section, { scrollTrigger: { trigger: section, start: "top 85%", toggleActions: "play none none reverse" }, duration: 1.2, opacity: 1, y: 0, ease: "power3.out" });
+      gsap.from(section.querySelector(".blue-title"), { scrollTrigger: { trigger: section, start: "top 80%" }, duration: 1, opacity: 0, y: 30, delay: 0.3, ease: "power2.out" });
+    });
+
+    // 4. MASCOTTE
+    gsap.to("#instructions", { scrollTrigger: { trigger: "#instructions", start: "top 85%", toggleActions: "play none none reverse" }, duration: 1, opacity: 1, y: 0, ease: "back.out(1.2)" });
+
+    // 5. CHART LINE (SCROLLY)
+    const years = [2000, 2005, 2010, 2015, 2020, 2024];
+    const datasets = [
+      { label: "Totale", color: "rgba(52, 73, 94, 1)", dimColor: "rgba(52, 73, 94, 0.2)", tension: 0.3, data: [100, 96.3, 97.2, 82.3, 70.5, 77.6] },
+      { label: "Acquisto Auto", color: "rgba(46, 204, 113, 1)", dimColor: "rgba(46, 204, 113, 0.2)", tension: 0.3, data: [100, 86.6, 87.1, 82.3, 67.8, 77.6] },
+      { label: "Carburante", color: "rgba(241, 196, 15, 1)", dimColor: "rgba(241, 196, 15, 0.25)", tension: 0.3, data: [100, 113.2, 115.3, 92.0, 74.7, 89.0] },
+      { label: "Pedaggi", color: "rgba(231, 76, 60, 1)", dimColor: "rgba(231, 76, 60, 0.25)", tension: 0.3, data: [100, 117.0, 131.9, 145.7, 161.2, 149.3] }
+    ];
+    const seriesDescriptions = {
+      "Totale": { title: "Totale spese di esercizio", text: "Il totale delle spese di esercizio, in termini reali, scende rispetto al 2000: l’indice passa da 100 a circa 78 punti nel 2024. Significa che, complessivamente, possedere e usare un’auto pesa meno sul bilancio familiare rispetto a inizio anni Duemila." },
+      "Acquisto Auto": { title: "Acquisto dell’auto (interessi inclusi)", text: "La componente di acquisto mostra un calo ancora più netto: dal livello 100 nel 2000 scende a poco meno di 70 punti nel 2020, per poi risalire verso 78 nel 2024. I tassi bassi e le dinamiche di prezzo hanno alleggerito il costo reale di acquisto, anche se l’ultimo triennio segna un’inversione di tendenza." },
+      "Carburante": { title: "Carburante", text: "Dopo una fase iniziale di rincaro, il carburante torna su livelli inferiori alla base 2000: nel 2024 l’indice è intorno a 89. Efficienza dei motori, minori percorrenze e una parziale ricalibrazione dei prezzi alla pompa attenuano l’impatto di questa voce sul totale." },
+      "Pedaggi": { title: "Pedaggi autostradali", text: "I pedaggi sono la vera eccezione: la curva sale costantemente sopra 130–160 punti, e nel 2024 l’indice è vicino a 150, cioè quasi il 50% in più rispetto al 2000. Per chi usa spesso l’autostrada, questa è la voce che più ha eroso il potere d’acquisto nel tempo." }
+    };
+    const seriesColorMap = datasets.reduce((acc, ds) => { acc[ds.label] = ds.color; return acc; }, {});
+    function applyHighlightStylesToArray(dsArray, activeLabel) { dsArray.forEach(ds => { const isActive = ds.label === activeLabel; ds.borderWidth = isActive ? 4 : 2; ds.borderColor = isActive ? ds.color : ds.dimColor; ds.pointRadius = isActive ? 4 : 1; ds.pointHoverRadius = isActive ? 5 : 2; ds.pointBackgroundColor = isActive ? ds.color : ds.dimColor; ds.pointBorderColor = isActive ? ds.color : ds.dimColor; }); }
+    function withAlpha(rgbaString, alpha) { return rgbaString.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[^)]+\)/, (match, r, g, b) => `rgba(${r}, ${g}, ${b}, ${alpha})`); }
+    const steps = document.querySelectorAll("#scrolly .step"); const captionEl = document.getElementById("chart-caption"); const ctxChart = document.getElementById("chart").getContext("2d"); let chart; let currentActiveLabel = "Totale";
+    function updateHighlight(label) { if (!chart) return; applyHighlightStylesToArray(chart.data.datasets, label); chart.update(); }
+    function updateCaption(label) { const info = seriesDescriptions[label]; if (info) { captionEl.innerHTML = `<div class="caption-label">${label}</div><h3>${info.title}</h3><p>${info.text}</p>`; const baseColor = seriesColorMap[label]; if (baseColor) { const glassBg = withAlpha(baseColor, 0.10); const borderCol = withAlpha(baseColor, 0.45); const shadowCol = withAlpha(baseColor, 0.25); captionEl.style.background = glassBg; captionEl.style.borderColor = borderCol; captionEl.style.boxShadow = `0 10px 25px ${shadowCol}`; const captionLabelEl = captionEl.querySelector(".caption-label"); if (captionLabelEl) captionLabelEl.style.color = borderCol; } } else { captionEl.innerHTML = ""; captionEl.removeAttribute("style"); } }
+    function setActiveFromNarrative(label) { currentActiveLabel = label; updateHighlight(label); updateCaption(label); }
+    function setActiveStep(element, { scrollIntoView = false } = {}) { const seriesLabel = element.dataset.series; steps.forEach(step => { step.classList.remove("is-active"); step.style.borderLeftColor = "#ccc"; }); element.classList.add("is-active"); const activeColor = seriesColorMap[seriesLabel]; if (activeColor) element.style.borderLeftColor = activeColor; setActiveFromNarrative(seriesLabel); if (scrollIntoView) { element.scrollIntoView({ behavior: "smooth", block: "center" }); } }
+    applyHighlightStylesToArray(datasets, currentActiveLabel);
+    const chartConfig = { type: "line", data: { labels: years, datasets: datasets.map(ds => ({ ...ds })) }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { boxWidth: 14 }, onClick: (evt, legendItem, legend) => { const label = legendItem.text; const targetStep = Array.from(steps).find(step => step.dataset.series === label); if (targetStep) setActiveStep(targetStep, { scrollIntoView: true }); else setActiveFromNarrative(label); }, onHover: (evt) => { if (evt?.native?.target) evt.native.target.style.cursor = "pointer"; }, onLeave: (evt) => { if (evt?.native?.target) evt.native.target.style.cursor = "default"; } }, title: { display: true, text: "Indice spese auto (2000 = 100)", font: { size: 16 } } }, scales: { y: { beginAtZero: false } } } };
+    chart = new Chart(ctxChart, chartConfig);
+    const observerOptions = { root: null, rootMargin: '-45% 0px -45% 0px', threshold: 0 };
+    const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { setActiveStep(entry.target); } }); }, observerOptions);
+    steps.forEach(step => observer.observe(step));
+    const firstStep = steps[0]; if (firstStep) setActiveStep(firstStep, { scrollIntoView: false }); else setActiveFromNarrative(currentActiveLabel);
+
+    // 6. INTERACTIVE CHART (PAGE 3)
+    
+    // Dataset Completo per Page 3 (Trend)
+    // NOTA: Per le voci minori dove non ho dati storici, simulo una crescita lineare da 100 a X.
+    const allTrends = {
+      "Pedaggi": { data: [100, 117, 131.9, 145.7, 161.2, 149.3], color: "#e74c3c" },
+      "Tassa Auto": { data: [100, 102, 104, 106, 108, 110.9], color: "#e67e22" }, // Simulata
+      "Parcheggi": { data: [100, 101, 103, 105, 106, 108.3], color: "#f1c40f" }, // Simulata
+      "Carburante": { data: [100, 113.2, 115.3, 92.0, 74.7, 89.0], color: "#3498db" },
+      "Pneumatici": { data: [100, 98, 95, 90, 88, 85.5], color: "#2ecc71" }, // Simulata
+      "Manutenzione": { data: [100, 97, 94, 90, 86, 83.6], color: "#27ae60" }, // Simulata
+      "RCA": { data: [100, 95, 90, 85, 82, 80.3], color: "#1abc9c" }, // Simulata
+      "Acquisto": { data: [100, 86.6, 87.1, 82.3, 67.8, 77.6], color: "#9b59b6" }
+    };
+
+    const ctxInt = document.getElementById('interactiveChart').getContext('2d');
+    let interactiveChart;
+
+    // Crea Bottoni
+    const controls = document.getElementById('chartControls');
+    Object.keys(allTrends).forEach(key => {
+      const btn = document.createElement('button');
+      btn.className = 'chart-btn';
+      btn.innerText = key;
+      btn.onclick = () => loadTrend(key, btn);
+      controls.appendChild(btn);
+    });
+
+    function loadTrend(key, btnElement) {
+      // Gestione stato attivo bottoni
+      document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+      if(btnElement) btnElement.classList.add('active');
+
+      const dataset = allTrends[key];
+      
+      if (interactiveChart) {
+        interactiveChart.data.datasets[0].label = key;
+        interactiveChart.data.datasets[0].data = dataset.data;
+        interactiveChart.data.datasets[0].borderColor = dataset.color;
+        interactiveChart.data.datasets[0].backgroundColor = dataset.color;
+        interactiveChart.update();
+      } else {
+        interactiveChart = new Chart(ctxInt, {
+          type: 'line',
+          data: {
+            labels: years,
+            datasets: [{
+              label: key,
+              data: dataset.data,
+              borderColor: dataset.color,
+              backgroundColor: dataset.color,
+              borderWidth: 3,
+              tension: 0.3,
+              fill: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: true, labels: { font: { size: 14 } } },
+              tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                callbacks: { label: (c) => `Indice: ${c.raw}` }
+              }
+            },
+            scales: {
+              y: { beginAtZero: false, grid: { color: '#f0f0f0' } },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      }
+    }
+
+    // Init con primo valore
+    loadTrend("Pedaggi", controls.children[0]);
+
+    // Animazione Entrata Page 3
+    gsap.to("#title-3", { scrollTrigger: { trigger: "#title-3", start: "top 80%" }, duration: 1, opacity: 1, y: 0, ease: "power3.out" });
+    gsap.to(".interactive-wrapper", { scrollTrigger: { trigger: "#title-3", start: "top 80%" }, duration: 1, opacity: 1, y: 0, delay: 0.3, ease: "power3.out" });
+
+  </script>
 </body>
 </html>
